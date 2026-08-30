@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Search, Shield, ChevronRight, Loader2, AlertCircle, GraduationCap } from 'lucide-react'
+import Logo from '@/components/shared/Logo'
 
 export default function HomePage() {
   const router = useRouter()
@@ -66,9 +67,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between h-16">
             {/* Logo + Name */}
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm border border-gray-100">
-                <img src="/logo.png" alt="Digi Result Logo" className="w-full h-full object-contain" />
-              </div>
+              <Logo size="md" withWhiteBg={false} />
               <p className="font-bold text-gray-900 text-base leading-tight">Digi Result</p>
             </div>
 
@@ -190,9 +189,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-white flex items-center justify-center overflow-hidden flex-shrink-0 border border-gray-100">
-                <img src="/logo.png" alt="Digi Result Logo" className="w-full h-full object-contain" />
-              </div>
+              <Logo size="sm" withWhiteBg={false} />
               <p className="text-xs font-semibold text-gray-800">Digi Result</p>
             </div>
             <p className="text-xs text-muted-foreground">Class 8 &bull; Class 10 &bull; Class 12</p>

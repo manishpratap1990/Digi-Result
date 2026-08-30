@@ -4,10 +4,11 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
-  LayoutDashboard, BookOpen, Users, Upload, Settings, LogOut, Menu, X, GraduationCap
+  LayoutDashboard, BookOpen, Users, Upload, Settings, LogOut, Menu, X
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import Logo from '@/components/shared/Logo'
 
 const navItems = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -29,7 +30,8 @@ export default function AdminSidebar() {
     }
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push('/admin/login')
+    // Redirect to public homepage after logout
+    router.push('/')
     router.refresh()
   }
 
@@ -37,9 +39,7 @@ export default function AdminSidebar() {
     <>
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-border/60">
-        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm border border-gray-100">
-          <img src="/logo.png" alt="Digi Result Logo" className="w-full h-full object-contain" />
-        </div>
+        <Logo size="md" withWhiteBg={false} />
         <div className="min-w-0">
           <p className="font-semibold text-gray-900 text-sm truncate">Digi Result</p>
           <p className="text-xs text-muted-foreground">Admin Panel</p>
@@ -47,7 +47,7 @@ export default function AdminSidebar() {
       </div>
 
       {/* Nav Links */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-1" aria-label="Admin navigation">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/')
           return (
@@ -92,15 +92,14 @@ export default function AdminSidebar() {
       {/* Mobile header bar */}
       <div className="lg:hidden bg-white border-b border-border/60 fixed top-0 left-0 right-0 z-20 px-4 h-14 flex items-center justify-between" style={{ boxShadow: '0 1px 4px rgba(59,130,246,0.08)' }}>
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm border border-gray-100">
-            <img src="/logo.png" alt="Digi Result Logo" className="w-full h-full object-contain" />
-          </div>
+          <Logo size="sm" withWhiteBg={false} />
           <p className="font-semibold text-gray-900 text-sm">Digi Result — Admin</p>
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
           aria-label="Toggle menu"
+          aria-expanded={mobileOpen}
         >
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -109,7 +108,7 @@ export default function AdminSidebar() {
       {/* Mobile Drawer */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-30">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setMobileOpen(false)} />
+          <div className="absolute inset-0 bg-black/30" onClick={() => setMobileOpen(false)} aria-hidden />
           <aside className="absolute left-0 top-0 h-full w-72 bg-white flex flex-col animate-slide-in" style={{ boxShadow: '4px 0 20px rgba(0,0,0,0.08)' }}>
             <NavContent />
           </aside>

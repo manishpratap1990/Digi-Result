@@ -65,18 +65,47 @@ export default function ImportPage() {
 
   const parseFile = async (file: File) => {
     if (!subjects.length) { toast.error('Please select an examination with subjects first.'); return }
+
+    // ── Security: File validation ────────────────────────────────────────
+    const MAX_SIZE_MB = 5
+    const ALLOWED_EXTENSIONS = ['.xlsx', '.xls', '.csv']
+    const fileExt = file.name.toLowerCase().slice(file.name.lastIndexOf('.'))
+
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      toast.error(`File too large. Maximum allowed size is ${MAX_SIZE_MB}MB.`)
+      return
+    }
+    if (!ALLOWED_EXTENSIONS.includes(fileExt)) {
+      toast.error('Invalid file type. Please upload an Excel (.xlsx, .xls) or CSV file.')
+      return
+    }
+
     setParsing(true)
     setRows(null)
     setImportDone(false)
 
+    // Helper: strip formula injection characters from cell values
+    const sanitizeCell = (val: unknown): string => {
+      const s = String(val || '').trim()
+      return s && ['=', '+', '-', '@'].includes(s[0]) ? s.replace(/^[=+\-@]+/, '') : s
+    }
+
     try {
       const XLSX = (await import('xlsx')).default || await import('xlsx')
       const buf = await file.arrayBuffer()
-      const wb = XLSX.read(buf, { type: 'array' })
+      const wb = XLSX.read(buf, { type: 'array', cellFormula: false, cellHTML: false })
       const ws = wb.Sheets[wb.SheetNames[0]]
-      const raw: string[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' }) as string[][]
+      const raw: string[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false }) as string[][]
 
       if (raw.length < 2) { toast.error('File appears empty.'); setParsing(false); return }
+
+      const MAX_ROWS = 500
+      if (raw.length > MAX_ROWS + 1) {
+        toast.error(`Too many rows. Maximum ${MAX_ROWS} students per import.`)
+        setParsing(false)
+        return
+      }
+
 
       const parsed: ImportRow[] = []
       for (let i = 1; i < raw.length; i++) {
@@ -84,9 +113,9 @@ export default function ImportPage() {
         if (row.every((c: string) => !String(c).trim())) continue
 
         const errors: string[] = []
-        const rollNumber = String(row[0] || '').trim()
-        const studentName = String(row[1] || '').trim()
-        const dateOfBirth = String(row[2] || '').trim()
+        const rollNumber = sanitizeCell(row[0])
+        const studentName = sanitizeCell(row[1])
+        const dateOfBirth = sanitizeCell(row[2])
 
         if (!rollNumber) errors.push('Roll Number is missing')
         if (!studentName) errors.push('Student Name is missing')
