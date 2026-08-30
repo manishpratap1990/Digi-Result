@@ -2,10 +2,12 @@
   "name": "result-portal",
   "version": "1.0.0",
   "private": true,
+  "main": "server.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node server.js",
+    "start:next": "next start",
     "lint": "next lint"
   },
   "engines": {
